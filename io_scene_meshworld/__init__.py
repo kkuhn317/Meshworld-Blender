@@ -73,11 +73,17 @@ class MESHWORLD_OT_import(Operator):
         subtype="DIR_PATH",
         default="",
     )
+    use_hierarchy: BoolProperty(
+        name="Octree Hierarchy",
+        description="Create a Blender collection per MESHWORLD octree node instead of a flat import",
+        default=False,
+    )
 
     def execute(self, context):
         meshworld_import.import_meshworld(
             self.filepath,
             custom_texture_dir=self.custom_texture_dir if self.use_custom_texture_dir else "",
+            use_hierarchy=self.use_hierarchy,
         )
         return {"FINISHED"}
 

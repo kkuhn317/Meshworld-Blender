@@ -9,7 +9,7 @@ from . import meshworld_format as fmt
 from .meshworld_material import make_material
 
 
-def import_meshworld(filepath, custom_texture_dir=""):
+def import_meshworld(filepath, custom_texture_dir="", use_hierarchy=False):
     with open(filepath, "rb") as f:
         data = f.read()
     reader = fmt.MeshWorldReader(data)
@@ -50,8 +50,16 @@ def import_meshworld(filepath, custom_texture_dir=""):
         meshes.append(read_mesh_node(reader))
 
     # Build geometry meshes
+    if use_hierarchy:
+        root_collection = get_or_create_collection(
+            strip_level_name(filepath), bpy.context.scene.collection)
+    else:
+        root_collection = None
+
     for m in meshes:
-        build_geometry_mesh(m, verts, filepath, custom_texture_dir)
+        build_geometry_mesh(m, verts, filepath, custom_texture_dir,
+                            parent_collection=root_collection,
+                            use_hierarchy=use_hierarchy)
 
     # Build ref points as empties
     for rp in ref_points:
@@ -165,7 +173,26 @@ def read_mesh_node(reader):
     return m
 
 
-def build_geometry_mesh(m, verts, filepath, custom_texture_dir):
+def strip_level_name(filepath):
+    base = os.path.basename(filepath)
+    if "." in base:
+        base = base[:base.rfind(".")]
+    return base or "Level"
+
+
+def get_or_create_collection(name, parent):
+    name = name or "Folder"
+    for child in parent.children:
+        if child.name == name:
+            return child
+    # new() auto-suffixes (.001, ...) if the name exists elsewhere.
+    coll = bpy.data.collections.new(name)
+    parent.children.link(coll)
+    return coll
+
+
+def build_geometry_mesh(m, verts, filepath, custom_texture_dir,
+                        parent_collection=None, use_hierarchy=False):
     for g in m["geoms"]:
         name = g["name"] or m["name"]
 
@@ -233,7 +260,12 @@ def build_geometry_mesh(m, verts, filepath, custom_texture_dir):
                 uv_layer.data[loop_idx].uv = all_verts[vert_idx][2]
 
         obj = bpy.data.objects.new(name, mesh)
-        bpy.context.collection.objects.link(obj)
+        if use_hierarchy:
+            node_collection = get_or_create_collection(
+                m["name"], parent_collection or bpy.context.scene.collection)
+            node_collection.objects.link(obj)
+        else:
+            bpy.context.collection.objects.link(obj)
 
         # Material
         texture_name = g.get("texture", "")
@@ -253,7 +285,14 @@ def build_geometry_mesh(m, verts, filepath, custom_texture_dir):
 
     # Recurse into octree children
     for child in m["children"]:
-        build_geometry_mesh(child, verts, filepath, custom_texture_dir)
+        if use_hierarchy:
+            child_parent = get_or_create_collection(
+                m["name"], parent_collection or bpy.context.scene.collection)
+        else:
+            child_parent = None
+        build_geometry_mesh(child, verts, filepath, custom_texture_dir,
+                            parent_collection=child_parent,
+                            use_hierarchy=use_hierarchy)
 
 
 def build_ref_point(rp):

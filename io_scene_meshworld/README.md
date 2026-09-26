@@ -28,7 +28,8 @@ Blender add-on for importing and exporting Hamsterball `.MESHWORLD` level files.
 
 ### Import
 
-1. **File → Import → Hamsterball MESHWORLD (.meshworld)**
+- Import: `File -> Import -> Hamsterball MESHWORLD (.meshworld)`
+  (`Octree Hierarchy` checkbox puts each mesh node in its own collection)
 2. Select a `.MESHWORLD` file
 3. Optional: choose a custom texture directory
 4. Click **Import MESHWORLD**
