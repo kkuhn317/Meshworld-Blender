@@ -43,6 +43,8 @@ if "bpy" in locals():
         importlib.reload(meshworld_props)
     if "meshworld_ui" in locals():
         importlib.reload(meshworld_ui)
+    if "meshworld_create" in locals():
+        importlib.reload(meshworld_create)
 
 from . import (
     meshworld_format,
@@ -51,6 +53,7 @@ from . import (
     meshworld_material,
     meshworld_props,
     meshworld_ui,
+    meshworld_create,
 )
 
 
@@ -129,6 +132,7 @@ def register():
         bpy.utils.register_class(c)
     meshworld_props.register()
     meshworld_ui.register()
+    meshworld_create.register()
     TOPBAR_MT_file_import.append(menu_func_import)
     TOPBAR_MT_file_export.append(menu_func_export)
 
@@ -136,6 +140,7 @@ def register():
 def unregister():
     TOPBAR_MT_file_import.remove(menu_func_import)
     TOPBAR_MT_file_export.remove(menu_func_export)
+    meshworld_create.unregister()
     meshworld_ui.unregister()
     meshworld_props.unregister()
     for c in reversed(classes):

@@ -91,6 +91,8 @@ class MeshWorldSceneProps(bpy.types.PropertyGroup):
         size=3,
         default=(1000000.0, 1000000.0, 1000000.0),
     )
+    helper_name: StringProperty(name="Helper Name", default="NEWPOINT")
+    helper_light_type: IntProperty(name="Light Type", default=0, min=0)
 
 
 classes = [
