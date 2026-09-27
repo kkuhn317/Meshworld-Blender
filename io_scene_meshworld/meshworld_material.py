@@ -4,6 +4,18 @@ import os
 from . import meshworld_format as fmt
 
 
+PIXELATED_SUBSTRINGS = ("checker", "brick")
+
+
+def texture_interpolation(texture_name):
+    """Closest (pixelated) for checker/brick-style textures, Linear otherwise."""
+    base = (texture_name or "").lower()
+    for sub in PIXELATED_SUBSTRINGS:
+        if sub in base:
+            return "Closest"
+    return "Linear"
+
+
 def make_material(name, diffuse, ambient, specular, emissive, power, has_reflection, texture_path=None, texture_name=""):
     """Create a Blender material matching a MESHWORLD geom."""
     mat = bpy.data.materials.new(name=name or "Material")
@@ -65,8 +77,9 @@ def make_material(name, diffuse, ambient, specular, emissive, power, has_reflect
     if texture_path and os.path.isfile(texture_path):
         tex_image = nodes.new("ShaderNodeTexImage")
         tex_image.location = (-300, 0)
-        # Closest = nearest-neighbor, matches the game's pixelated look.
-        tex_image.interpolation = "Closest"
+        # Checker/brick-style textures stay pixelated like in-game;
+        # decals and everything else filter smooth.
+        tex_image.interpolation = texture_interpolation(texture_name)
         try:
             img = bpy.data.images.load(texture_path, check_existing=True)
             tex_image.image = img
