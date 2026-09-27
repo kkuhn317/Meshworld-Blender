@@ -255,8 +255,9 @@ def export_object_geometry(obj, global_verts):
         return None
 
     mesh.calc_loop_triangles()
-    mesh.calc_normals_split()
 
+    # NOTE: no calc_normals_split() call. It was removed in Blender 5.1;
+    # loop normals are available without it.
     uv_layer = mesh.uv_layers.active
 
     # Collect unique local vertices
