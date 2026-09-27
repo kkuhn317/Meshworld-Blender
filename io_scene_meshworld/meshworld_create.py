@@ -59,7 +59,9 @@ class MESHWORLD_OT_add_light(Operator):
 
     def execute(self, context):
         mw = context.scene.meshworld
-        name = clean_base_name(mw.helper_name, "")
+        # Lights default to "Light"; a typed helper name overrides it.
+        raw = (mw.helper_name or "").strip()
+        name = raw if raw and raw != "NEWPOINT" else "Light"
         light_data = bpy.data.lights.new(name=name, type="SUN")
         light_data.energy = 1.0
         obj = bpy.data.objects.new(name, light_data)
