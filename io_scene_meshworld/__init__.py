@@ -45,6 +45,8 @@ if "bpy" in locals():
         importlib.reload(meshworld_ui)
     if "meshworld_create" in locals():
         importlib.reload(meshworld_create)
+    if "meshworld_meshops" in locals():
+        importlib.reload(meshworld_meshops)
 
 from . import (
     meshworld_format,
@@ -54,6 +56,7 @@ from . import (
     meshworld_props,
     meshworld_ui,
     meshworld_create,
+    meshworld_meshops,
 )
 
 
@@ -113,17 +116,71 @@ class MESHWORLD_OT_export(Operator):
         return {"RUNNING_MODAL"}
 
 
+class MESH_OT_import(Operator):
+    """Import Hamsterball MESH model"""
+    bl_idname = "import_scene.hamster_mesh"
+    bl_label = "Import MESH"
+    bl_options = {"PRESET", "UNDO"}
+
+    filepath: StringProperty(subtype="FILE_PATH")
+    filter_glob: StringProperty(default="*.MESH;*.mesh", options={"HIDDEN"})
+
+    use_custom_texture_dir: BoolProperty(
+        name="Use Custom Texture Directory",
+        description="Pick a directory to search for textures instead of ../Textures",
+        default=False,
+    )
+    custom_texture_dir: StringProperty(
+        name="Texture Directory",
+        subtype="DIR_PATH",
+        default="",
+    )
+
+    def execute(self, context):
+        meshworld_meshops.import_mesh(
+            self.filepath,
+            custom_texture_dir=self.custom_texture_dir if self.use_custom_texture_dir else "",
+        )
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {"RUNNING_MODAL"}
+
+
+class MESH_OT_export(Operator):
+    """Export selected objects to Hamsterball MESH model"""
+    bl_idname = "export_scene.hamster_mesh"
+    bl_label = "Export MESH"
+    bl_options = {"PRESET"}
+
+    filepath: StringProperty(subtype="FILE_PATH")
+    filter_glob: StringProperty(default="*.MESH;*.mesh", options={"HIDDEN"})
+
+    def execute(self, context):
+        meshworld_meshops.export_mesh(self.filepath)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {"RUNNING_MODAL"}
+
+
 def menu_func_import(self, context):
     self.layout.operator(MESHWORLD_OT_import.bl_idname, text="Hamsterball MESHWORLD (.meshworld)")
+    self.layout.operator(MESH_OT_import.bl_idname, text="Hamsterball MESH (.mesh)")
 
 
 def menu_func_export(self, context):
     self.layout.operator(MESHWORLD_OT_export.bl_idname, text="Hamsterball MESHWORLD (.meshworld)")
+    self.layout.operator(MESH_OT_export.bl_idname, text="Hamsterball MESH (.mesh)")
 
 
 classes = [
     MESHWORLD_OT_import,
     MESHWORLD_OT_export,
+    MESH_OT_import,
+    MESH_OT_export,
 ]
 
 
