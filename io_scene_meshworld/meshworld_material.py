@@ -65,6 +65,8 @@ def make_material(name, diffuse, ambient, specular, emissive, power, has_reflect
     if texture_path and os.path.isfile(texture_path):
         tex_image = nodes.new("ShaderNodeTexImage")
         tex_image.location = (-300, 0)
+        # Closest = nearest-neighbor, matches the game's pixelated look.
+        tex_image.interpolation = "Closest"
         try:
             img = bpy.data.images.load(texture_path, check_existing=True)
             tex_image.image = img
