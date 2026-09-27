@@ -50,7 +50,17 @@ Open the **Scene Properties** tab and scroll to **Hamsterball Scene** to edit ba
 
 ## Notes
 
-- This add-on is flat import/export only; hierarchy is flattened.
+- Tick `Octree Hierarchy` on import to keep each mesh node in its own collection.
 - Ref points are imported as empties with custom object properties.
 - Splines are imported as curve objects.
 - Lights are imported as Sun lights.
+
+## New level checklist
+
+1. Model your geometry (any meshes; triangulated automatically on export).
+2. `N` panel → Hamsterball tab: add a ref point named `START...`
+   (the game spawns the ball here), plus any splines and lights.
+3. Scene Properties → Hamsterball Scene: background and ambient colors.
+4. **File → Export → Hamsterball MESHWORLD**. Root bounds are computed
+   from your geometry automatically.
+5. The exporter warns you if there is no geometry or no `REF:START` point.
