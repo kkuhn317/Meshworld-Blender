@@ -12,6 +12,12 @@ from .meshworld_material import get_meshworld_material_data, normalize_texture_n
 FOLDER_NAMES = {"RefPoints", "Splines", "Lights", "Level_Root", "SceneMetadata"}
 
 
+def show_warning(title, message):
+    def draw(self, context):
+        self.layout.label(text=message)
+    bpy.context.window_manager.popup_menu(draw, title=title, icon="ERROR")
+
+
 def export_meshworld(filepath):
     scene = bpy.context.scene
 
@@ -32,6 +38,15 @@ def export_meshworld(filepath):
             lights.append(obj)
         elif obj.type == "MESH" and obj.data and obj.data.polygons:
             geom_objects.append(obj)
+
+    if not geom_objects:
+        show_warning("MESHWORLD Export",
+                     "No mesh objects in the scene, nothing to export.")
+        return
+
+    if not any(o.name.startswith("REF:START") for o in ref_points):
+        show_warning("MESHWORLD Export",
+                     "No REF:START ref point. The game needs one to spawn the ball. Exporting anyway.")
 
     with open(filepath, "wb") as f:
         writer = fmt.MeshWorldWriter(f)
@@ -172,8 +187,23 @@ def write_vertices_and_meshes(writer, geom_objects, scene):
     for v in verts:
         writer.write_vertex(v)
 
-    root_min = scene.meshworld.root_bound_min
-    root_max = scene.meshworld.root_bound_max
+    # Auto-compute root bounds from the exported vertices (file units,
+    # same space the importer stores in the scene props). Falls back to
+    # the scene values when there is no geometry.
+    if verts:
+        root_min = (
+            min(v["X"] for v in verts),
+            min(v["Y"] for v in verts),
+            min(v["Z"] for v in verts),
+        )
+        root_max = (
+            max(v["X"] for v in verts),
+            max(v["Y"] for v in verts),
+            max(v["Z"] for v in verts),
+        )
+    else:
+        root_min = scene.meshworld.root_bound_min
+        root_max = scene.meshworld.root_bound_max
     writer.write_float(root_min[0])
     writer.write_float(root_min[1])
     writer.write_float(root_min[2])
@@ -225,8 +255,9 @@ def export_object_geometry(obj, global_verts):
         return None
 
     mesh.calc_loop_triangles()
-    mesh.calc_normals_split()
 
+    # NOTE: no calc_normals_split() call. It was removed in Blender 5.1;
+    # loop normals are available without it.
     uv_layer = mesh.uv_layers.active
 
     # Collect unique local vertices
