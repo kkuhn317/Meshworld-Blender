@@ -62,7 +62,9 @@ def import_mesh(filepath, custom_texture_dir=""):
                         pos = fmt.convert_in_vertex((v["X"], v["Y"], v["Z"]))
                         norm = fmt.normal_convert_in_vertex((v["NX"], v["NY"], v["NZ"]))
                         vert_index_map[key] = len(all_verts)
-                        all_verts.append((pos, norm, (v["U"], v["V"])))
+                        # Game textures are D3D top-left origin; Blender UVs
+                        # are OpenGL bottom-left. Flip V so the preview matches.
+                        all_verts.append((pos, norm, (v["U"], 1.0 - v["V"])))
                     face.append(vert_index_map[key])
                 all_faces.append(tuple(face))
 
@@ -220,7 +222,8 @@ def _export_object_geometry(obj):
         file_verts.append({
             "X": fp[0], "Y": fp[1], "Z": fp[2],
             "NX": fn[0], "NY": fn[1], "NZ": fn[2],
-            "U": uv[0], "V": uv[1],
+            # Flip V back to D3D top-left origin (see import).
+            "U": uv[0], "V": 1.0 - uv[1],
         })
 
     n = len(local_verts)
