@@ -16,6 +16,7 @@ Blender add-on for importing and exporting Hamsterball `.MESHWORLD` level files.
 - Imports ref points, splines, and directional lights
 - Exports geometry as triangle strips
 - Writes textures to a `textures/` folder next to the MESHWORLD file
+- Import/export Hamsterball `.MESH` prop models (ball, hamster, chomper...)
 
 ## Installation
 
@@ -39,6 +40,15 @@ Blender add-on for importing and exporting Hamsterball `.MESHWORLD` level files.
 1. **File → Export → Hamsterball MESHWORLD (.meshworld)**
 2. Choose the output location
 3. Click **Export MESHWORLD**
+
+### MESH models
+
+1. **File → Import → Hamsterball MESH (.mesh)**, pick a `.MESH` file.
+   Each model part becomes one object in a collection named after the file.
+2. Edit, then select the objects and **File → Export → Hamsterball MESH (.mesh)**.
+   Each selected mesh object becomes one model part.
+3. Animation is file-per-frame: export one `.MESH` per pose
+   (like the stock `Hamster-Trot1/2/3` files).
 
 ## Material editing
 
