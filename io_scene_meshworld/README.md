@@ -2,6 +2,8 @@
 
 Blender add-on for importing and exporting Hamsterball `.MESHWORLD` level files.
 
+Full documentation: [HamsterMall Wiki — Blender Add-on](https://github.com/kkuhn317/HamsterMall/wiki/Blender-Addon)
+
 ## Features
 
 - Import full MESHWORLD levels into Blender
